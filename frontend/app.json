@@ -6,7 +6,9 @@
     "scheme": "sacredlounge",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
+    "assetBundlePatterns": [
+      "assets/*"
+    ],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.sacredlounge.app"

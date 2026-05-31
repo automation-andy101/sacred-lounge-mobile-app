@@ -1,21 +1,26 @@
-// src/screens/HomeScreen.tsx
 import React from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, ImageBackground, Linking, ActivityIndicator,
+  StyleSheet, Linking, ActivityIndicator, ImageBackground, Dimensions,
 } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { homeApi } from '../services/api';
 import { Colors, Spacing, Radius } from '../theme/colors';
+import { Image } from 'react-native';
 
-const LotusIcon = () => (
-  <Text style={{ fontSize: 28, color: Colors.gold, textAlign: 'center' }}>❀</Text>
-);
+console.log('HomeScreen loading...');
+const { height } = Dimensions.get('window');
 
-const Divider = () => (
-  <View style={styles.divider} />
-);
+const HERO_BG = require('../../assets/hero.jpg')
+
+function LotusIcon({ size = 40, color = Colors.gold }: { size?: number; color?: string }) {
+  return (
+    <Text style={{ fontSize: size * 0.8, color, textAlign: 'center', lineHeight: size }}>
+      ☸
+    </Text>
+  );
+}
 
 export default function HomeScreen() {
   const { data, isLoading } = useQuery({
@@ -33,26 +38,49 @@ export default function HomeScreen() {
       day:   format(d, 'EEE').toUpperCase(),
       date:  format(d, 'd'),
       month: format(d, 'MMM').toUpperCase(),
-      time:  format(d, 'h:mm a'),
+      timeStart: format(d, 'h:mm a'),
+      timeEnd: '',
     };
   };
 
+  const HeroContent = () => (
+    <View style={styles.heroContent}>
+      <LotusIcon size={48} color={Colors.gold} />
+      <Text style={styles.brandName}>SACRED LOUNGE</Text>
+      <Text style={styles.tagline}>Meditation · Music · Meaning</Text>
+      <View style={styles.divider} />
+      <Text style={styles.heroSubtitle}>Find deep calm{'\n'}in a busy world</Text>
+    </View>
+  );
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-      {/* Hero */}
-      <View style={styles.hero}>
-        <LotusIcon />
-        <Text style={styles.brandName}>SACRED LOUNGE</Text>
-        <Text style={styles.tagline}>Meditation · Music · Meaning</Text>
-        <Divider />
-        <Text style={styles.heroSubtitle}>Find deep calm{'\n'}in a busy world</Text>
+    
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <Image source={require('../../assets/hero.jpg')} style={{ width: 100, height: 100 }} />
+      {/* ── Hero ── */}
+      {HERO_BG ? (
+        <ImageBackground source={HERO_BG} style={styles.hero} resizeMode="cover">
+          <View style={styles.heroDarkOverlay}>
+            <HeroContent />
+          </View>
+        </ImageBackground>
+      ) : (
+        <View style={[styles.hero, styles.heroFallback]}>
+          <HeroContent />
+        </View>
+      )}
+
+      {/* ── Welcome ── */}
+      <View style={styles.section}>
+        <Text style={styles.welcomeHeading}>Welcome ☸</Text>
+        <Text style={styles.welcomeText}>Take a pause. Reconnect.{'\n'}Be present.</Text>
       </View>
 
       {isLoading ? (
-        <ActivityIndicator color={Colors.gold} style={{ marginTop: Spacing.xl }} />
+        <ActivityIndicator color={Colors.gold} style={{ margin: Spacing.xl }} />
       ) : (
         <>
-          {/* Upcoming Event Card */}
+          {/* ── Upcoming Event ── */}
           {data?.nextEvent && (() => {
             const ev = data.nextEvent;
             const fmt = formatEventDate(ev.eventDate);
@@ -69,11 +97,11 @@ export default function HomeScreen() {
                     <Text style={styles.eventTitle}>{ev.title}</Text>
                     <View style={styles.metaRow}>
                       <Text style={styles.metaIcon}>🕐</Text>
-                      <Text style={styles.metaText}>{fmt.time}</Text>
+                      <Text style={styles.metaText}>{fmt.timeStart}</Text>
                     </View>
                     <View style={styles.metaRow}>
                       <Text style={styles.metaIcon}>📍</Text>
-                      <Text style={styles.metaText}>{ev.locationName}, {ev.locationAddress}</Text>
+                      <Text style={styles.metaText}>{ev.locationName},{'\n'}{ev.locationAddress}</Text>
                     </View>
                   </View>
                 </View>
@@ -88,15 +116,15 @@ export default function HomeScreen() {
             );
           })()}
 
-          {/* Today's Inspiration */}
+          {/* ── Today's Inspiration ── */}
           {data?.todaysInspiration && (
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>Today's Inspiration</Text>
               <View style={styles.inspirationCard}>
-                <Text style={styles.quoteMarks}>"</Text>
+                <Text style={styles.quoteOpen}>"</Text>
                 <Text style={styles.quoteText}>{data.todaysInspiration.quote}</Text>
-                <Text style={styles.quoteMarks} numberOfLines={1}>"</Text>
-                <LotusIcon />
+                <Text style={styles.quoteClose}>"</Text>
+                <LotusIcon size={28} color={Colors.gold} />
                 {data.todaysInspiration.author && (
                   <Text style={styles.quoteAuthor}>— {data.todaysInspiration.author}</Text>
                 )}
@@ -105,65 +133,68 @@ export default function HomeScreen() {
           )}
         </>
       )}
+
+      <View style={{ height: Spacing.xxl }} />
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  content: {
-    paddingBottom: Spacing.xxl,
-  },
-  hero: {
+  container: { flex: 1, backgroundColor: Colors.background },
+
+  // Hero
+  hero: { height: height * 0.6 },
+  heroFallback: {
+    backgroundColor: '#120A04',
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: Spacing.xxl,
-    paddingBottom: Spacing.xl,
+  },
+  heroDarkOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(10,6,2,0.55)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  heroContent: {
+    alignItems: 'center',
     paddingHorizontal: Spacing.lg,
   },
   brandName: {
-    fontFamily: 'CinzelDecorative_400Regular',
     fontSize: 22,
     color: Colors.goldLight,
-    letterSpacing: 4,
-    marginTop: Spacing.sm,
+    letterSpacing: 6,
+    fontWeight: '300',
     textAlign: 'center',
+    marginTop: Spacing.sm,
   },
   tagline: {
-    fontFamily: 'CormorantGaramond_400Regular',
-    fontSize: 16,
+    fontSize: 15,
     color: Colors.gold,
     letterSpacing: 2,
     marginTop: Spacing.sm,
     textAlign: 'center',
   },
   divider: {
-    width: 60,
+    width: 50,
     height: 1,
     backgroundColor: Colors.goldMuted,
     marginVertical: Spacing.lg,
   },
   heroSubtitle: {
-    fontFamily: 'CormorantGaramond_400Italic',
-    fontSize: 26,
+    fontSize: 22,
     color: Colors.textPrimary,
     textAlign: 'center',
-    lineHeight: 36,
+    lineHeight: 32,
+    fontStyle: 'italic',
   },
-  section: {
-    paddingHorizontal: Spacing.lg,
-    marginTop: Spacing.lg,
-  },
-  sectionLabel: {
-    fontFamily: 'System',
-    fontSize: 11,
-    color: Colors.gold,
-    letterSpacing: 3,
-    marginBottom: Spacing.sm,
-    fontWeight: '600',
-  },
+
+  // Welcome
+  section: { paddingHorizontal: Spacing.lg, marginTop: Spacing.lg },
+  welcomeHeading: { fontSize: 28, color: Colors.textPrimary, fontWeight: '300', marginBottom: Spacing.xs },
+  welcomeText: { fontSize: 16, color: Colors.textSecondary, lineHeight: 24, marginBottom: Spacing.sm },
+  sectionLabel: { fontSize: 11, color: Colors.gold, letterSpacing: 3, marginBottom: Spacing.sm, fontWeight: '600' },
+
+  // Event card
   eventCard: {
     backgroundColor: Colors.backgroundCard,
     borderRadius: Radius.md,
@@ -172,6 +203,7 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     flexDirection: 'row',
     gap: Spacing.md,
+    marginBottom: Spacing.md,
   },
   eventDateBlock: {
     alignItems: 'center',
@@ -181,63 +213,26 @@ const styles = StyleSheet.create({
     paddingRight: Spacing.md,
     justifyContent: 'center',
   },
-  eventDay: {
-    fontSize: 11,
-    color: Colors.gold,
-    fontWeight: '700',
-    letterSpacing: 1,
-  },
-  eventDateNum: {
-    fontSize: 32,
-    color: Colors.goldLight,
-    fontFamily: 'CinzelDecorative_400Regular',
-    lineHeight: 36,
-  },
-  eventMonth: {
-    fontSize: 11,
-    color: Colors.gold,
-    fontWeight: '700',
-    letterSpacing: 1,
-  },
-  eventInfo: {
-    flex: 1,
-    gap: 6,
-  },
-  eventTitle: {
-    fontFamily: 'CormorantGaramond_700Bold',
-    fontSize: 18,
-    color: Colors.textPrimary,
-    lineHeight: 22,
-    marginBottom: 4,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  metaIcon: {
-    fontSize: 12,
-  },
-  metaText: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-    flex: 1,
-  },
+  eventDay: { fontSize: 11, color: Colors.gold, fontWeight: '700', letterSpacing: 1 },
+  eventDateNum: { fontSize: 32, color: Colors.goldLight, fontWeight: '200', lineHeight: 36 },
+  eventMonth: { fontSize: 11, color: Colors.gold, fontWeight: '700', letterSpacing: 1 },
+  eventInfo: { flex: 1, gap: 6 },
+  eventTitle: { fontSize: 17, color: Colors.textPrimary, fontWeight: '500', lineHeight: 22 },
+  metaRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 6 },
+  metaIcon: { fontSize: 12, marginTop: 1 },
+  metaText: { fontSize: 13, color: Colors.textSecondary, flex: 1, lineHeight: 18 },
+
+  // Reserve button
   reserveButton: {
-    marginTop: Spacing.md,
-    backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: Colors.gold,
     borderRadius: Radius.sm,
     paddingVertical: Spacing.md,
     alignItems: 'center',
   },
-  reserveButtonText: {
-    fontSize: 12,
-    color: Colors.goldLight,
-    letterSpacing: 3,
-    fontWeight: '700',
-  },
+  reserveButtonText: { fontSize: 12, color: Colors.goldLight, letterSpacing: 3, fontWeight: '700' },
+
+  // Inspiration
   inspirationCard: {
     backgroundColor: Colors.backgroundCard,
     borderRadius: Radius.md,
@@ -245,26 +240,9 @@ const styles = StyleSheet.create({
     borderColor: Colors.goldMuted,
     padding: Spacing.lg,
     alignItems: 'center',
-    gap: Spacing.sm,
   },
-  quoteMarks: {
-    fontSize: 32,
-    color: Colors.goldMuted,
-    fontFamily: 'CormorantGaramond_700Bold',
-    lineHeight: 28,
-    alignSelf: 'flex-start',
-  },
-  quoteText: {
-    fontFamily: 'CormorantGaramond_400Italic',
-    fontSize: 19,
-    color: Colors.gold,
-    textAlign: 'center',
-    lineHeight: 28,
-  },
-  quoteAuthor: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-    fontFamily: 'CormorantGaramond_400Regular',
-    marginTop: 4,
-  },
+  quoteOpen: { fontSize: 40, color: Colors.goldMuted, fontWeight: '700', alignSelf: 'flex-start', lineHeight: 32 },
+  quoteText: { fontSize: 18, color: Colors.gold, textAlign: 'center', lineHeight: 28, fontStyle: 'italic' },
+  quoteClose: { fontSize: 40, color: Colors.goldMuted, fontWeight: '700', alignSelf: 'flex-end', lineHeight: 32 },
+  quoteAuthor: { fontSize: 13, color: Colors.textSecondary, marginTop: Spacing.xs, fontStyle: 'italic' },
 });
