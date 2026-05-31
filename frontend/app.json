@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "Sacred Lounge",
+    "slug": "sacred-lounge",
+    "version": "1.0.0",
+    "scheme": "sacredlounge",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.sacredlounge.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0D0A07"
+      },
+      "package": "com.sacredlounge.app"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ]
+  }
+}
