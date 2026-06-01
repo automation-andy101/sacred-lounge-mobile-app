@@ -56,11 +56,13 @@ export default function RootLayout() {
             tabBarShowLabel: false,
           }}
         >
-          <Tabs.Screen name="index"      options={{ headerShown: false,  tabBarIcon: ({ focused }) => <TabIcon label="Home"    focused={focused} /> }} />
-          <Tabs.Screen name="events"     options={{ title: 'Events',     tabBarIcon: ({ focused }) => <TabIcon label="Events"  focused={focused} /> }} />
-          <Tabs.Screen name="experience" options={{ title: 'Experience', tabBarIcon: ({ focused }) => <TabIcon label="Explore" focused={focused} /> }} />
-          <Tabs.Screen name="library"    options={{ title: 'Library',    tabBarIcon: ({ focused }) => <TabIcon label="Library" focused={focused} /> }} />
-          <Tabs.Screen name="profile"    options={{ title: 'Profile',    tabBarIcon: ({ focused }) => <TabIcon label="Profile" focused={focused} /> }} />
+          <Tabs.Screen name="index"        options={{ headerShown: false,  tabBarIcon: ({ focused }) => <TabIcon label="Home"    focused={focused} /> }} />
+          <Tabs.Screen name="events"       options={{ title: 'Events',     tabBarIcon: ({ focused }) => <TabIcon label="Events"  focused={focused} /> }} />
+          <Tabs.Screen name="experience"   options={{ title: 'Experience', tabBarIcon: ({ focused }) => <TabIcon label="Explore" focused={focused} /> }} />
+          <Tabs.Screen name="library"      options={{ title: 'Library',    tabBarIcon: ({ focused }) => <TabIcon label="Library" focused={focused} /> }} />
+          <Tabs.Screen name="profile"      options={{ title: 'Profile',    tabBarIcon: ({ focused }) => <TabIcon label="Profile" focused={focused} /> }} />
+          <Tabs.Screen name="event"        options={{ href: null }} />
+          <Tabs.Screen name="event/[slug]" options={{ href: null }} />
         </Tabs>
       </AuthProvider>
     </QueryClientProvider>
