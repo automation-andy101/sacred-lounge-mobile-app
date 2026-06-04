@@ -7,7 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 
-const API_BASE = 'http://192.168.1.21:8080/api';
+const API_BASE = process.env.EXPO_PUBLIC_API_URL;
 
 type Tab = 'upcoming' | 'past';
 

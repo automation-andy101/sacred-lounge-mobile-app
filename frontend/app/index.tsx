@@ -11,7 +11,7 @@ const { height } = Dimensions.get('window');
 const HERO_BG = require('../assets/hero.jpg');
 const LOGO    = require('../assets/logo.png');
 
-const API_URL = 'http://192.168.1.21:8080/api/home';
+const API_URL = `${process.env.EXPO_PUBLIC_API_URL ?? 'http://192.168.1.21:8080/api'}/home`
 
 export default function Home() {
   const { data, isLoading } = useQuery({
