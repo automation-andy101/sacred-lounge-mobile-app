@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ArrowLeft } from 'lucide-react-native';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL;
 
@@ -49,77 +50,84 @@ export default function MyBookings() {
     : pastQuery.data ?? [];
 
   return (
-    <View style={styles.container}>
+      <View style={styles.container}>
 
-      {/* ── Tabs ── */}
-      <View style={styles.tabBar}>
-        <TouchableOpacity
-          style={[styles.tab, tab === 'upcoming' && styles.tabActive]}
-          onPress={() => setTab('upcoming')}
-        >
-          <Text style={[styles.tabText, tab === 'upcoming' && styles.tabTextActive]}>Upcoming</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, tab === 'past' && styles.tabActive]}
-          onPress={() => setTab('past')}
-        >
-          <Text style={[styles.tabText, tab === 'past' && styles.tabTextActive]}>Past</Text>
-        </TouchableOpacity>
-      </View>
+        <View style={styles.backRow}>
+            <TouchableOpacity style={styles.backBtn} onPress={() => router.push('/profile')}>
+                <ArrowLeft size={22} color={S.gold} {...({} as any)} />
+                <Text style={styles.backText}>Back</Text>
+            </TouchableOpacity>
+        </View>
 
-      {isLoading ? (
-        <ActivityIndicator color={S.gold} style={styles.loader} />
-      ) : (
-        <FlatList
-          data={bookings}
-          keyExtractor={item => item.id}
-          contentContainerStyle={styles.list}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-          ListEmptyComponent={() => (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyIcon}>🕯</Text>
-              <Text style={styles.emptyTitle}>No bookings yet</Text>
-              <Text style={styles.emptyText}>
-                {tab === 'upcoming'
-                  ? 'Reserve your space at an upcoming Sacred Lounge event.'
-                  : 'Your past events will appear here.'}
-              </Text>
-              {tab === 'upcoming' && (
+        {/* ── Tabs ── */}
+        <View style={styles.tabBar}>
+            <TouchableOpacity
+            style={[styles.tab, tab === 'upcoming' && styles.tabActive]}
+            onPress={() => setTab('upcoming')}
+            >
+            <Text style={[styles.tabText, tab === 'upcoming' && styles.tabTextActive]}>Upcoming</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+            style={[styles.tab, tab === 'past' && styles.tabActive]}
+            onPress={() => setTab('past')}
+            >
+            <Text style={[styles.tabText, tab === 'past' && styles.tabTextActive]}>Past</Text>
+            </TouchableOpacity>
+        </View>
+
+        {isLoading ? (
+            <ActivityIndicator color={S.gold} style={styles.loader} />
+        ) : (
+            <FlatList
+            data={bookings}
+            keyExtractor={item => item.id}
+            contentContainerStyle={styles.list}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+            ListEmptyComponent={() => (
+                <View style={styles.emptyContainer}>
+                <Text style={styles.emptyIcon}>🕯</Text>
+                <Text style={styles.emptyTitle}>No bookings yet</Text>
+                <Text style={styles.emptyText}>
+                    {tab === 'upcoming'
+                    ? 'Reserve your space at an upcoming Sacred Lounge event.'
+                    : 'Your past events will appear here.'}
+                </Text>
+                {tab === 'upcoming' && (
+                    <TouchableOpacity
+                    style={styles.browseBtn}
+                    onPress={() => router.push('/events')}
+                    >
+                    <Text style={styles.browseBtnText}>BROWSE EVENTS</Text>
+                    </TouchableOpacity>
+                )}
+                </View>
+            )}
+            renderItem={({ item }) => {
+                const d = new Date(item.event.eventDate);
+                return (
                 <TouchableOpacity
-                  style={styles.browseBtn}
-                  onPress={() => router.push('/events')}
+                    style={styles.bookingRow}
+                    onPress={() => router.push({ pathname: '/event/[slug]', params: { slug: item.event.slug } })}
+                    activeOpacity={0.75}
                 >
-                  <Text style={styles.browseBtnText}>BROWSE EVENTS</Text>
+                    <View style={styles.datePill}>
+                    <Text style={styles.datePillDay}>{format(d, 'EEE').toUpperCase()}</Text>
+                    <Text style={styles.datePillNum}>{format(d, 'd')}</Text>
+                    <Text style={styles.datePillMonth}>{format(d, 'MMM').toUpperCase()}</Text>
+                    </View>
+                    <View style={styles.bookingInfo}>
+                    <Text style={styles.bookingTitle}>{item.event.title}</Text>
+                    <Text style={styles.bookingMeta}>🕐 {format(d, 'h:mm a')}</Text>
+                    <Text style={styles.bookingMeta}>📍 {item.event.locationName}</Text>
+                    <View style={[styles.statusBadge, item.status === 'CONFIRMED' && styles.statusConfirmed]}>
+                        <Text style={styles.statusText}>{item.status}</Text>
+                    </View>
+                    </View>
                 </TouchableOpacity>
-              )}
-            </View>
-          )}
-          renderItem={({ item }) => {
-            const d = new Date(item.event.eventDate);
-            return (
-              <TouchableOpacity
-                style={styles.bookingRow}
-                onPress={() => router.push({ pathname: '/event/[slug]', params: { slug: item.event.slug } })}
-                activeOpacity={0.75}
-              >
-                <View style={styles.datePill}>
-                  <Text style={styles.datePillDay}>{format(d, 'EEE').toUpperCase()}</Text>
-                  <Text style={styles.datePillNum}>{format(d, 'd')}</Text>
-                  <Text style={styles.datePillMonth}>{format(d, 'MMM').toUpperCase()}</Text>
-                </View>
-                <View style={styles.bookingInfo}>
-                  <Text style={styles.bookingTitle}>{item.event.title}</Text>
-                  <Text style={styles.bookingMeta}>🕐 {format(d, 'h:mm a')}</Text>
-                  <Text style={styles.bookingMeta}>📍 {item.event.locationName}</Text>
-                  <View style={[styles.statusBadge, item.status === 'CONFIRMED' && styles.statusConfirmed]}>
-                    <Text style={styles.statusText}>{item.status}</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            );
-          }}
-        />
-      )}
+                );
+            }}
+            />
+        )}
     </View>
   );
 }
@@ -208,6 +216,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: S.goldDim,
   },
-  statusConfirmed: { borderColor: S.success },
-  statusText: { fontSize: 10, color: S.success, letterSpacing: 1 },
+    statusConfirmed: { borderColor: S.success },
+    statusText: { fontSize: 10, color: S.success, letterSpacing: 1 },
+    backBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+        gap: 8,
+    },
+    backText: {
+        fontSize: 14,
+        color: S.gold,
+    },
+    backRow: {
+        borderBottomWidth: 1,
+        borderBottomColor: S.border,
+    },
 });
