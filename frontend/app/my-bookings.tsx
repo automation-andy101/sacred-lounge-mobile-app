@@ -19,21 +19,27 @@ export default function MyBookings() {
   const upcomingQuery = useQuery({
     queryKey: ['bookings', 'upcoming'],
     queryFn: async () => {
-        const token = await AsyncStorage.getItem('accessToken');
-        return fetch(`${API_BASE}/profile/bookings/upcoming`, {
+        const token = typeof window !== 'undefined' 
+            ? localStorage.getItem('accessToken')
+            : await AsyncStorage.getItem('accessToken');
+        const res = await fetch(`${API_BASE}/profile/bookings/upcoming`, {
             headers: { Authorization: `Bearer ${token}` }
-        }).then(r => r.json());
+        });
+        return res.json();
     },
   });
 
   const pastQuery = useQuery({
     queryKey: ['bookings', 'past'],
     queryFn: async () => {
-        const token = await AsyncStorage.getItem('accessToken');
-        return fetch(`${API_BASE}/profile/bookings/past`, {
+        const token = typeof window !== 'undefined'
+            ? localStorage.getItem('accessToken')
+            : await AsyncStorage.getItem('accessToken');
+        const res = await fetch(`${API_BASE}/profile/bookings/past`, {
             headers: { Authorization: `Bearer ${token}` }
-        }).then(r => r.json());
-    },
+        });
+        return res.json();
+    },                              
     enabled: tab === 'past',
   });
 
