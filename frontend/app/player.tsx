@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  Dimensions, ActivityIndicator,
+  Dimensions, ActivityIndicator, ScrollView,
 } from 'react-native';
 import { Audio } from 'expo-av';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -149,7 +149,7 @@ export default function Player() {
   const progress = totalSecs > 0 ? (currentSecs / totalSecs) * (width - 40) : 0;
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.container}>
       <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
         <ArrowLeft size={22} color={S.gold} {...({} as any)} />
         <Text style={styles.backText}>Back</Text>
@@ -201,7 +201,7 @@ export default function Player() {
       {!audioUrl && !error && (
         <Text style={styles.note}>Audio will play once a file is uploaded to this meditation.</Text>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -211,16 +211,27 @@ const S = {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: S.bg, alignItems: 'center', paddingHorizontal: 20 },
   backBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingTop: 16, paddingBottom: 8 },
   backText: { fontSize: 14, color: S.gold },
-  artContainer: { width: width - 80, height: width - 80, borderRadius: 20, backgroundColor: S.card, borderWidth: 1, borderColor: S.goldDim, alignItems: 'center', justifyContent: 'center', marginTop: 16, marginBottom: 32, gap: 12 },
+  artContainer: { 
+    width: Math.min(width - 60, 240), 
+    height: Math.min(width - 60, 240), 
+    borderRadius: 20, 
+    backgroundColor: S.card, 
+    borderWidth: 1, 
+    borderColor: S.goldDim, 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    marginTop: 8,    
+    marginBottom: 16,
+    gap: 12 
+  },
   artIcon: { fontSize: 64 },
   artLogo: { fontSize: 14, color: S.gold, letterSpacing: 4, fontWeight: '300' },
   titleContainer: { alignItems: 'center', marginBottom: 32 },
   title: { fontSize: 22, color: S.text, fontWeight: '300', textAlign: 'center', letterSpacing: 0.5, marginBottom: 6 },
   subtitle: { fontSize: 13, color: S.textMuted, letterSpacing: 2 },
-  progressContainer: { width: '100%', marginBottom: 40 },
+  progressContainer: { width: '100%', marginBottom: 20 },
   progressTrack: { width: '100%', height: 3, backgroundColor: S.goldDim, borderRadius: 2, marginBottom: 8, overflow: 'hidden' },
   progressFill: { height: '100%', backgroundColor: S.gold, borderRadius: 2 },
   timeRow: { flexDirection: 'row', justifyContent: 'space-between' },
@@ -231,4 +242,13 @@ const styles = StyleSheet.create({
   playPauseBtn: { width: 72, height: 72, borderRadius: 36, backgroundColor: S.gold, alignItems: 'center', justifyContent: 'center' },
   errorText: { fontSize: 13, color: S.error, textAlign: 'center', marginBottom: 16, paddingHorizontal: 20 },
   note: { fontSize: 12, color: S.goldDim, textAlign: 'center', fontStyle: 'italic', lineHeight: 18, paddingHorizontal: 20 },
+  scrollContainer: {
+    flex: 1,
+    backgroundColor: S.bg,
+  },
+  container: {
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
 });
