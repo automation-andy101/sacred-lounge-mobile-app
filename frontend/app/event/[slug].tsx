@@ -6,6 +6,8 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { ArrowLeft } from 'lucide-react-native';
+import EventHeaderPlaceholder from '../../src/components/EventHeaderPlaceholder';
 
 const { height } = Dimensions.get('window');
 const API_BASE = 'http://192.168.1.21:8080/api';
@@ -35,13 +37,22 @@ export default function EventDetail() {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
 
+      <TouchableOpacity 
+        style={styles.backBtn} 
+        onPress={() => router.push('/events')}
+      >
+        <ArrowLeft size={22} color={'#BD8950'} {...({} as any)} />
+        <Text style={styles.backBtnText}>Events</Text>
+      </TouchableOpacity>
+
       {/* ── Header Image ── */}
       <View style={styles.headerImageWrapper}>
         {event.imageUrl ? (
           <Image source={{ uri: event.imageUrl }} style={styles.headerImage} resizeMode="cover" />
         ) : (
-          <View style={[styles.headerImage, styles.headerPlaceholder]}>
-            <Text style={styles.placeholderIcon}>🕯</Text>
+          <View style={styles.headerPlaceholder}>
+            {/* <Image source={require('../../assets/logo.png')} style={styles.headerLogo} resizeMode="contain" /> */}
+            <EventHeaderPlaceholder />
           </View>
         )}
       </View>
@@ -149,11 +160,11 @@ const styles = StyleSheet.create({
     height: 220,
     borderRadius: 12,
   },
-  headerPlaceholder: {
-    backgroundColor: S.card,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  // headerPlaceholder: {
+  //   backgroundColor: S.card,
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  // },
   placeholderIcon: {
     fontSize: 48,
   },
@@ -277,5 +288,31 @@ const styles = StyleSheet.create({
     color: S.bg,
     letterSpacing: 4,
     fontWeight: '700',
+  },
+  backBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    gap: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#2A1A0E',
+  },
+  backBtnText: {
+  fontSize: 14,
+  color: '#BD8950',
+  },
+  headerPlaceholder: {
+    width: '100%',
+    height: 220,
+    borderRadius: 12,
+    backgroundColor: '#1A0F08',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#4A3220',
+  },
+  headerLogo: {
+    width: 200,
+    height: 80,
   },
 });

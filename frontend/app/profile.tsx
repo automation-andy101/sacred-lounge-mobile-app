@@ -99,6 +99,7 @@ function ProfileView() {
     { label: 'Notifications',  icon: Bell,       onPress: () => {} },
     { label: 'Settings',       icon: Settings,   onPress: () => {} },
     { label: 'Help & Support', icon: HelpCircle, onPress: () => {} },
+    ...(user?.role === 'ADMIN' ? [{ label: 'Admin Panel', icon: Settings, onPress: () => router.push('/admin') }] : []),
   ];
 
   const initials = `${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase();
