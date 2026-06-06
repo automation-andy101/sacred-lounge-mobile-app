@@ -21,83 +21,122 @@ export default function Player() {
   const [currentSecs, setCurrentSecs] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const audioRef = useRef<any>(null);
 
   // Fetch audio URL from library item
   useEffect(() => {
+    console.log('Player mounted, id:', id);
     if (id) {
       const token = typeof window !== 'undefined'
         ? localStorage.getItem('accessToken')
         : null;
-      fetch(`${API_BASE}/library/${id}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      })
+      fetch(`${API_BASE}/library/${id}`)
+      // , {
+      //   headers: token ? { Authorization: `Bearer ${token}` } : {},
+      // })
         .then(r => r.json())
         .then(data => {
+          console.log('Library item data:', data);
           if (data.audioUrl) setAudioUrl(data.audioUrl);
+          else console.log('No audioUrl in data');
         })
-        .catch(() => setError('Could not load audio details'));
+        .catch(e => {
+          console.error('Fetch error:', e);
+          setError('Could not load audio details');
+        });
     }
   }, [id]);
 
-  // Load and play audio
+  // Cleanup
   useEffect(() => {
     return () => {
       if (sound) sound.unloadAsync();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
     };
   }, [sound]);
 
   const loadAndPlay = async () => {
+    console.log('loadAndPlay called, audioUrl:', audioUrl);
     if (!audioUrl) {
       setError('No audio file available for this meditation yet.');
       return;
     }
-    try {
-      setIsLoading(true);
-      setError(null);
-      await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
-      const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri: audioUrl },
-        { shouldPlay: true },
-        (status) => {
-          if (status.isLoaded) {
-            setCurrentSecs(Math.floor((status.positionMillis ?? 0) / 1000));
-            if (status.didJustFinish) {
-              setIsPlaying(false);
-              setCurrentSecs(0);
+
+    if (typeof window !== 'undefined') {
+      // Web — use HTML5 Audio
+      try {
+        setIsLoading(true);
+        const audio = new (window as any).Audio(audioUrl);
+        audioRef.current = audio;
+        audio.ontimeupdate = () => setCurrentSecs(Math.floor(audio.currentTime));
+        audio.onended = () => { setIsPlaying(false); setCurrentSecs(0); };
+        audio.onerror = (e: any) => {
+          console.error('Audio error:', e);
+          setError('Could not load audio. Please try again.');
+        };
+        console.log('Playing audio:', audioUrl);
+        await audio.play();
+        setIsPlaying(true);
+      } catch (e) {
+        console.error('Play error:', e);
+        setError('Could not load audio. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // Native — use expo-av
+      try {
+        setIsLoading(true);
+        await Audio.setAudioModeAsync({ playsInSilentModeIOS: true });
+        const { sound: newSound } = await Audio.Sound.createAsync(
+          { uri: audioUrl },
+          { shouldPlay: true },
+          (status) => {
+            if (status.isLoaded) {
+              setCurrentSecs(Math.floor((status.positionMillis ?? 0) / 1000));
+              if (status.didJustFinish) { setIsPlaying(false); setCurrentSecs(0); }
             }
           }
-        }
-      );
-      setSound(newSound);
-      setIsPlaying(true);
-    } catch (e) {
-      setError('Could not load audio. Please try again.');
-    } finally {
-      setIsLoading(false);
+        );
+        setSound(newSound);
+        setIsPlaying(true);
+      } catch (e) {
+        setError('Could not load audio. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   const togglePlay = async () => {
-    if (!sound) {
-      await loadAndPlay();
+    console.log('togglePlay, audioRef:', audioRef.current, 'audioUrl:', audioUrl, 'isPlaying:', isPlaying);
+    if (typeof window !== 'undefined') {
+      if (!audioRef.current) {
+        await loadAndPlay();
+        return;
+      }
+      if (isPlaying) { audioRef.current.pause(); setIsPlaying(false); }
+      else { audioRef.current.play(); setIsPlaying(true); }
       return;
     }
-    if (isPlaying) {
-      await sound.pauseAsync();
-      setIsPlaying(false);
-    } else {
-      await sound.playAsync();
-      setIsPlaying(true);
-    }
+    if (!sound) { await loadAndPlay(); return; }
+    if (isPlaying) { await sound.pauseAsync(); setIsPlaying(false); }
+    else { await sound.playAsync(); setIsPlaying(true); }
   };
 
   const seek = async (direction: 'back' | 'forward') => {
+    const delta = direction === 'back' ? -15 : 15;
+    if (typeof window !== 'undefined' && audioRef.current) {
+      audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime + delta);
+      return;
+    }
     if (!sound) return;
-    const delta = direction === 'back' ? -15000 : 15000;
     const status = await sound.getStatusAsync();
     if (status.isLoaded) {
-      const newPos = Math.max(0, (status.positionMillis ?? 0) + delta);
-      await sound.setPositionAsync(newPos);
+      await sound.setPositionAsync(Math.max(0, (status.positionMillis ?? 0) + delta * 1000));
     }
   };
 
@@ -111,26 +150,21 @@ export default function Player() {
 
   return (
     <View style={styles.container}>
-
-      {/* Back button */}
       <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
         <ArrowLeft size={22} color={S.gold} {...({} as any)} />
         <Text style={styles.backText}>Back</Text>
       </TouchableOpacity>
 
-      {/* Album Art */}
       <View style={styles.artContainer}>
         <Text style={styles.artIcon}>🕯</Text>
         <Text style={styles.artLogo}>SACRED LOUNGE</Text>
       </View>
 
-      {/* Title */}
       <View style={styles.titleContainer}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.subtitle}>Sacred Lounge</Text>
       </View>
 
-      {/* Progress bar */}
       <View style={styles.progressContainer}>
         <View style={styles.progressTrack}>
           <View style={[styles.progressFill, { width: progress }]} />
@@ -141,22 +175,15 @@ export default function Player() {
         </View>
       </View>
 
-      {/* Error message */}
       {error && <Text style={styles.errorText}>{error}</Text>}
 
-      {/* Controls */}
       <View style={styles.controls}>
         <TouchableOpacity onPress={() => seek('back')} style={styles.skipBtn}>
           <SkipBack size={28} color={S.gold} {...({} as any)} />
           <Text style={styles.skipLabel}>15</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.playPauseBtn}
-          onPress={togglePlay}
-          activeOpacity={0.8}
-          disabled={isLoading}
-        >
+        <TouchableOpacity style={styles.playPauseBtn} onPress={togglePlay} activeOpacity={0.8} disabled={isLoading}>
           {isLoading
             ? <ActivityIndicator color={S.bg} />
             : isPlaying
@@ -172,70 +199,36 @@ export default function Player() {
       </View>
 
       {!audioUrl && !error && (
-        <Text style={styles.note}>
-          Audio will play once a file is uploaded to this meditation in the admin panel.
-        </Text>
+        <Text style={styles.note}>Audio will play once a file is uploaded to this meditation.</Text>
       )}
     </View>
   );
 }
 
 const S = {
-  bg:        '#070302',
-  card:      '#1A0F08',
-  gold:      '#BD8950',
-  goldDim:   '#4A3220',
-  text:      '#E8DDCF',
-  textMuted: '#9C7D5E',
-  error:     '#C0514A',
+  bg: '#070302', card: '#1A0F08', gold: '#BD8950',
+  goldDim: '#4A3220', text: '#E8DDCF', textMuted: '#9C7D5E', error: '#C0514A',
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1, backgroundColor: S.bg,
-    alignItems: 'center', paddingHorizontal: 20,
-  },
-  backBtn: {
-    flexDirection: 'row', alignItems: 'center',
-    gap: 6, alignSelf: 'flex-start', paddingTop: 16, paddingBottom: 8,
-  },
+  container: { flex: 1, backgroundColor: S.bg, alignItems: 'center', paddingHorizontal: 20 },
+  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingTop: 16, paddingBottom: 8 },
   backText: { fontSize: 14, color: S.gold },
-  artContainer: {
-    width: width - 80, height: width - 80,
-    borderRadius: 20, backgroundColor: S.card,
-    borderWidth: 1, borderColor: S.goldDim,
-    alignItems: 'center', justifyContent: 'center',
-    marginTop: 16, marginBottom: 32, gap: 12,
-  },
+  artContainer: { width: width - 80, height: width - 80, borderRadius: 20, backgroundColor: S.card, borderWidth: 1, borderColor: S.goldDim, alignItems: 'center', justifyContent: 'center', marginTop: 16, marginBottom: 32, gap: 12 },
   artIcon: { fontSize: 64 },
   artLogo: { fontSize: 14, color: S.gold, letterSpacing: 4, fontWeight: '300' },
   titleContainer: { alignItems: 'center', marginBottom: 32 },
-  title: {
-    fontSize: 22, color: S.text, fontWeight: '300',
-    textAlign: 'center', letterSpacing: 0.5, marginBottom: 6,
-  },
+  title: { fontSize: 22, color: S.text, fontWeight: '300', textAlign: 'center', letterSpacing: 0.5, marginBottom: 6 },
   subtitle: { fontSize: 13, color: S.textMuted, letterSpacing: 2 },
   progressContainer: { width: '100%', marginBottom: 40 },
-  progressTrack: {
-    width: '100%', height: 3, backgroundColor: S.goldDim,
-    borderRadius: 2, marginBottom: 8, overflow: 'hidden',
-  },
+  progressTrack: { width: '100%', height: 3, backgroundColor: S.goldDim, borderRadius: 2, marginBottom: 8, overflow: 'hidden' },
   progressFill: { height: '100%', backgroundColor: S.gold, borderRadius: 2 },
   timeRow: { flexDirection: 'row', justifyContent: 'space-between' },
   timeText: { fontSize: 12, color: S.textMuted },
   controls: { flexDirection: 'row', alignItems: 'center', gap: 32, marginBottom: 24 },
   skipBtn: { alignItems: 'center', gap: 2 },
   skipLabel: { fontSize: 10, color: S.gold, letterSpacing: 1 },
-  playPauseBtn: {
-    width: 72, height: 72, borderRadius: 36,
-    backgroundColor: S.gold, alignItems: 'center', justifyContent: 'center',
-  },
-  errorText: {
-    fontSize: 13, color: S.error, textAlign: 'center',
-    marginBottom: 16, paddingHorizontal: 20,
-  },
-  note: {
-    fontSize: 12, color: S.goldDim, textAlign: 'center',
-    fontStyle: 'italic', lineHeight: 18, paddingHorizontal: 20,
-  },
+  playPauseBtn: { width: 72, height: 72, borderRadius: 36, backgroundColor: S.gold, alignItems: 'center', justifyContent: 'center' },
+  errorText: { fontSize: 13, color: S.error, textAlign: 'center', marginBottom: 16, paddingHorizontal: 20 },
+  note: { fontSize: 12, color: S.goldDim, textAlign: 'center', fontStyle: 'italic', lineHeight: 18, paddingHorizontal: 20 },
 });
