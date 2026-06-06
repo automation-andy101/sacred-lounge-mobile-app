@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
+import { router, useRouter } from 'expo-router';
 
 const { height } = Dimensions.get('window');
 const HERO_BG = require('../assets/hero.jpg');
@@ -14,6 +15,7 @@ const LOGO    = require('../assets/logo.png');
 const API_URL = `${process.env.EXPO_PUBLIC_API_URL ?? 'http://192.168.1.21:8080/api'}/home`
 
 export default function Home() {
+  const router = useRouter();
   const { data, isLoading } = useQuery({
     queryKey: ['home'],
     queryFn: () => fetch(API_URL).then(r => r.json()),
@@ -65,7 +67,7 @@ export default function Home() {
           </View>
           <TouchableOpacity
             style={styles.reserveButton}
-            onPress={() => data.nextEvent.eventbriteUrl && Linking.openURL(data.nextEvent.eventbriteUrl)}
+            onPress={() => router.push({ pathname: '/event/[slug]', params: { slug: data.nextEvent.slug } })}
             activeOpacity={0.7}
           >
             <Text style={styles.reserveButtonText}>RESERVE YOUR SPACE</Text>

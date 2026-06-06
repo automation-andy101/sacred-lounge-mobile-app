@@ -94,11 +94,11 @@ function ProfileView() {
 
   const menuItems = [
     { label: 'My Bookings',    icon: Bookmark,   onPress: () => router.push('/my-bookings') },
-    { label: 'My Favourites',  icon: Heart,      onPress: () => {} },
-    { label: 'Downloads',      icon: Download,   onPress: () => {} },
-    { label: 'Notifications',  icon: Bell,       onPress: () => {} },
-    { label: 'Settings',       icon: Settings,   onPress: () => {} },
-    { label: 'Help & Support', icon: HelpCircle, onPress: () => {} },
+    // { label: 'My Favourites',  icon: Heart,      onPress: () => {} },
+    // { label: 'Downloads',      icon: Download,   onPress: () => {} },
+    // { label: 'Notifications',  icon: Bell,       onPress: () => {} },
+    { label: 'Settings',       icon: Settings,   onPress: () => router.push('/settings') },
+    { label: 'Help & Support', icon: HelpCircle, onPress: () => router.push('/') },
     ...(user?.role === 'ADMIN' ? [{ label: 'Admin Panel', icon: Settings, onPress: () => router.push('/admin') }] : []),
   ];
 

@@ -66,6 +66,7 @@ export default function RootLayout() {
           <Tabs.Screen name="player"     options={{ href: null }} />
           <Tabs.Screen name="my-bookings" options={{ href: null }} />
           <Tabs.Screen name="admin" options={{ href: null }} />
+          <Tabs.Screen name="settings" options={{ href: null }} />
         </Tabs>
       </AuthProvider>
     </QueryClientProvider>
