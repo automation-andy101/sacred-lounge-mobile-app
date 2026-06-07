@@ -99,4 +99,8 @@ public class LibraryService {
                 i.getAudioUrl(), i.getImageUrl(),
                 i.getIsFeatured(), i.getIsFree(), i.getPlayCount());
     }
+
+    public List<LibraryDto.LibraryItemDetail> getAllItems() {
+        return libraryItemRepository.findAll().stream().map(this::toDetail).toList();
+    }
 }

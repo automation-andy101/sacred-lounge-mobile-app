@@ -50,6 +50,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/library/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/home/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/experiences/**").permitAll()
+                .requestMatchers("/profile/**").authenticated()
                 // Admin only
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 // Everything else requires authentication

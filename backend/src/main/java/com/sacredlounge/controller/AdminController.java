@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -77,5 +78,10 @@ public class AdminController {
     public ResponseEntity<Void> deleteLibraryItem(@PathVariable UUID id) {
         libraryService.deleteItem(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/library")
+    public ResponseEntity<List<LibraryDto.LibraryItemDetail>> listAllLibraryItems() {
+        return ResponseEntity.ok(libraryService.getAllItems());
     }
 }
