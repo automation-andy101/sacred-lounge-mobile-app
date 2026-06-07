@@ -18,6 +18,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (data: { email: string; password: string; firstName: string; lastName: string }) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (updates: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -62,6 +63,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await persistAuth(data);
   };
 
+  const updateUser = (updates: Partial<User>) => {
+    const updated = { ...user, ...updates } as User;
+    setUser(updated);
+    // Persist to storage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('user', JSON.stringify(updated));
+    }
+    AsyncStorage.setItem('user', JSON.stringify(updated));
+  };
+
   const logout = async () => {
     try {
       const refreshToken = await AsyncStorage.getItem('refreshToken');
@@ -74,7 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAdmin: user?.role === 'ADMIN', login, register, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, isAdmin: user?.role === 'ADMIN', login, register, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

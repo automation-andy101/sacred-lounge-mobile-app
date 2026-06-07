@@ -19,7 +19,10 @@ export default function Library() {
   });
 
   const goToPlayer = (item: any) => {
-    router.push({ pathname: '/player', params: { id: item.id, title: item.title, duration: item.durationSecs ?? 900 } });
+    router.push({ 
+      pathname: '/player', 
+      params: { id: item.id, title: item.title, duration: item.durationSecs ?? 900, from: 'library' } 
+    });
   };
 
   if (isLoading) {

@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Play } from 'lucide-react-native';
+import { ArrowLeft, Play } from 'lucide-react-native';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL;
 
@@ -26,6 +26,10 @@ export default function MediaList() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.backBtn} onPress={() => router.push('/experience')}>
+        <ArrowLeft size={22} color={S.gold} {...({} as any)} />
+        <Text style={styles.backText}>Explore</Text>
+      </TouchableOpacity>
       {isLoading ? (
         <ActivityIndicator color={S.gold} style={styles.loader} />
       ) : (
@@ -40,7 +44,10 @@ export default function MediaList() {
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.trackRow}
-              onPress={() => router.push({ pathname: '/player', params: { id: item.id, title: item.title, duration: item.durationSecs } })}
+              onPress={() => router.push({ 
+                pathname: '/player', 
+                params: { id: item.id, title: item.title, duration: item.durationSecs, from: 'explore' } 
+              })}
               activeOpacity={0.75}
             >
               <View style={styles.trackThumb}>
@@ -144,4 +151,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, padding: 16, borderBottomWidth: 1, borderBottomColor: '#2A1A0E' },
+  backText: { fontSize: 14, color: '#BD8950' },
 });

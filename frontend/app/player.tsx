@@ -11,7 +11,7 @@ const { width } = Dimensions.get('window');
 const API_BASE = process.env.EXPO_PUBLIC_API_URL;
 
 export default function Player() {
-  const { id, title, duration } = useLocalSearchParams<{ id: string; title: string; duration: string }>();
+  const { id, title, duration, from } = useLocalSearchParams<{ id: string; title: string; duration: string, from: string }>();
   const router = useRouter();
   const totalSecs = parseInt(duration ?? '900', 10);
 
@@ -150,9 +150,9 @@ export default function Player() {
 
   return (
     <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.container}>
-      <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+      <TouchableOpacity style={styles.backBtn} onPress={() => router.push(from === 'explore' ? '/experience' : '/library')}>
         <ArrowLeft size={22} color={S.gold} {...({} as any)} />
-        <Text style={styles.backText}>Back</Text>
+        <Text style={styles.backText}>{from === 'explore' ? 'Explore' : 'Library'}</Text>
       </TouchableOpacity>
 
       <View style={styles.artContainer}>

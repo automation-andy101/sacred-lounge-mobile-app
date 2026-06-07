@@ -57,7 +57,7 @@ function Field({ label, value, onChange, placeholder, secureTextEntry, keyboardT
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function SettingsScreen() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
 
   const [firstName, setFirstName] = useState(user?.firstName ?? '');
   const [lastName, setLastName] = useState(user?.lastName ?? '');
@@ -78,19 +78,24 @@ export default function SettingsScreen() {
     setProfileMsg('');
     setProfileError('');
     try {
-      await authFetch('/profile', {
+        const token = getToken();
+        const res = await fetch(`${API_BASE}/profile`, {
         method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ firstName, lastName, email }),
-      });
-      setProfileMsg('Profile updated successfully!');
+        });
+        if (!res.ok) throw new Error(`Failed: ${res.status}`);
+        setProfileMsg('Profile updated successfully!');
+        updateUser({ firstName, lastName, email });
     } catch (e: any) {
-      setProfileError(e.message);
+        setProfileError(e.message);
     } finally {
-      setProfileLoading(false);
+        setProfileLoading(false);
     }
   };
 
   const changePassword = async () => {
+    const token = getToken();
     setPasswordMsg('');
     setPasswordError('');
     if (newPassword !== confirmPassword) {
@@ -103,10 +108,12 @@ export default function SettingsScreen() {
     }
     setPasswordLoading(true);
     try {
-      await authFetch('/profile/password', {
+      const res = await fetch(`${API_BASE}/profile/password`, {
         method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ currentPassword, newPassword }),
-      });
+    });
+    if (!res.ok) throw new Error(`Failed: ${res.status}`);
       setPasswordMsg('Password changed successfully!');
       setCurrentPassword('');
       setNewPassword('');

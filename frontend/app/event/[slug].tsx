@@ -77,7 +77,7 @@ export default function EventDetail() {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
 
-      <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+      <TouchableOpacity style={styles.backBtn} onPress={() => router.push('/experience')}>
         <ArrowLeft size={22} color={S.gold} {...({} as any)} />
         <Text style={styles.backBtnText}>Events</Text>
       </TouchableOpacity>

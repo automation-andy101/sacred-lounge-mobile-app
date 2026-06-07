@@ -98,7 +98,7 @@ function ProfileView() {
     // { label: 'Downloads',      icon: Download,   onPress: () => {} },
     // { label: 'Notifications',  icon: Bell,       onPress: () => {} },
     { label: 'Settings',       icon: Settings,   onPress: () => router.push('/settings') },
-    { label: 'Help & Support', icon: HelpCircle, onPress: () => router.push('/') },
+    { label: 'Help & Support', icon: HelpCircle, onPress: () => router.push('/help') },
     ...(user?.role === 'ADMIN' ? [{ label: 'Admin Panel', icon: Settings, onPress: () => router.push('/admin') }] : []),
   ];
 
@@ -110,9 +110,9 @@ function ProfileView() {
       {/* ── Header ── */}
       <View style={styles.headerRow}>
         <Text style={styles.pageTitle}>Profile</Text>
-        <TouchableOpacity>
+        {/* <TouchableOpacity>
           <Settings size={22} color={S.gold} {...({} as any)} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* ── Avatar ── */}
