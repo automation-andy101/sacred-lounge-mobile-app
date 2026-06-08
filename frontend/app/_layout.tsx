@@ -65,9 +65,9 @@ export default function RootLayout() {
           <Tabs.Screen name="media-list" options={{ href: null, headerShown: false }} />
           <Tabs.Screen name="player"     options={{ href: null, headerShown: false }} />
           <Tabs.Screen name="my-bookings" options={{ href: null, headerShown: false }} />
-          <Tabs.Screen name="admin" options={{ href: null }} />
-          <Tabs.Screen name="settings" options={{ href: null }} />
-          <Tabs.Screen name="help" options={{ href: null }} />
+          <Tabs.Screen name="admin" options={{ href: null, headerShown: false }} />
+          <Tabs.Screen name="settings" options={{ href: null, headerShown: false }} />
+          <Tabs.Screen name="help" options={{ href: null, headerShown: false }} />
         </Tabs>
       </AuthProvider>
     </QueryClientProvider>
